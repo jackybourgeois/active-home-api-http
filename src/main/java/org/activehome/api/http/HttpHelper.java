@@ -37,6 +37,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Jacky Bourgeois
+ * @version %I%, %G%
+ */
 public class HttpHelper {
 
     public static String readBody(HttpServerExchange exchange) {

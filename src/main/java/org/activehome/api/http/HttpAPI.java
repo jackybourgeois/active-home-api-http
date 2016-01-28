@@ -62,11 +62,26 @@ import java.util.*;
 import static io.undertow.Handlers.resource;
 
 /**
- * Http API - allow the system to receive and send Message
- * throw http (web server)
+ * @author Jacky Bourgeois
+ * @version %I%, %G%
  */
 @ComponentType
 public class HttpAPI extends API {
+
+    @Param(defaultValue = "Http API - allow the system to receive and send Message throw http (web server)")
+    private String description;
+
+    @Param(defaultValue = "/activehome-api-http/master/docs/httpAPI.png")
+    private String img;
+
+    @Param(defaultValue = "/activehome-api-http/master/docs/httpAPI.md")
+    private String doc;
+
+    @Param(defaultValue = "/activehome-api-http/master/docs/httpAPI.kevs")
+    private String demoScript;
+
+    @Param(defaultValue = "/activehome-api-http")
+    private String src;
 
     @Param(defaultValue = "localhost")
     private String address;
