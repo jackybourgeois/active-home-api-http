@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.activehome</groupId>
-    <artifactId>org.activehome.api.http</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <groupId>org.active-home</groupId>
+    <artifactId>org.active-home.api.http</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Active Home :: API :: Http</name>
     <description>An HTTP access to Active Home</description>
-    <url>https://active-home.org</url>
+    <url>http://active-home.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,9 +29,9 @@
     </organization>
 
     <scm>
-        <connection>scm:git:git@github.com:jackybourgeois/activehome-api-http.git</connection>
-        <developerConnection>scm:git:git@github.com:jackybourgeois/activehome-api-http.git</developerConnection>
-        <url>http://github.com/jackybourgeois/activehome-api-http.git</url>
+        <connection>scm:git:git@github.com:jackybourgeois/active-home-api-http.git</connection>
+        <developerConnection>scm:git:git@github.com:jackybourgeois/active-home-api-http.git</developerConnection>
+        <url>http://github.com/jackybourgeois/active-home-api-http.git</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -76,23 +76,23 @@
             <version>1.2.8.Final</version>
         </dependency>
         <dependency>
-            <groupId>org.activehome</groupId>
-            <artifactId>org.activehome.api</artifactId>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.activehome</groupId>
-            <artifactId>org.activehome.com</artifactId>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.com</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.activehome</groupId>
-            <artifactId>org.activehome.user</artifactId>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.user</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.activehome</groupId>
-            <artifactId>org.activehome.tools</artifactId>
+            <groupId>org.active-home</groupId>
+            <artifactId>org.active-home.tools</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -129,14 +129,52 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>2.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
                         <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
                             <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -162,7 +200,7 @@
                         <phase>process-sources</phase>
                         <configuration>
                             <licenseName>gpl_v3</licenseName>
-                            <organizationName>org.activehome</organizationName>
+                            <organizationName>Active Home Project</organizationName>
                             <inceptionYear>2016</inceptionYear>
                             <roots>
                                 <root>src/main/java</root>
@@ -186,13 +224,9 @@
     </build>
 
     <distributionManagement>
-        <repository>
-            <id>active-home-internal</id>
-            <url>sftp://active-home.org/maven/repo/internal</url>
-        </repository>
         <snapshotRepository>
-            <id>active-home-snapshots</id>
-            <url>sftp://active-home.org/maven/repo/snapshots</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -201,14 +235,7 @@
             <id>kevoree-oss</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
-        <repository>
-            <id>active-home-snapshots</id>
-            <url>http://active-home.org:8080/maven/snapshots/</url>
-        </repository>
-        <repository>
-            <id>active-home-internal</id>
-            <url>http://active-home.org:8080/maven/internal/</url>
-        </repository>
+
     </repositories>
 
     <pluginRepositories>

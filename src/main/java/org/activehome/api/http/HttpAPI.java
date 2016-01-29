@@ -6,7 +6,7 @@ package org.activehome.api.http;
  * $Id:$
  * $HeadURL:$
  * %%
- * Copyright (C) 2016 org.activehome
+ * Copyright (C) 2016 Active Home Project
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -68,19 +68,9 @@ import static io.undertow.Handlers.resource;
 @ComponentType
 public class HttpAPI extends API {
 
-    @Param(defaultValue = "Http API - allow the system to receive and send Message throw http (web server)")
+    @Param(defaultValue = "Allow the system to receive and send Message throw http (web server).")
     private String description;
-
-    @Param(defaultValue = "/activehome-api-http/master/docs/httpAPI.png")
-    private String img;
-
-    @Param(defaultValue = "/activehome-api-http/master/docs/httpAPI.md")
-    private String doc;
-
-    @Param(defaultValue = "/activehome-api-http/master/docs/httpAPI.kevs")
-    private String demoScript;
-
-    @Param(defaultValue = "/activehome-api-http")
+    @Param(defaultValue = "/active-home-api-http")
     private String src;
 
     @Param(defaultValue = "localhost")
@@ -141,9 +131,9 @@ public class HttpAPI extends API {
 
     public SSLContext createSSLContext() {
         try {
-            String ksName = System.getProperty("activehome.home") + "/keystore.jks";
+            String ksName = System.getProperty("active-home.home") + "/keystore.jks";
             Properties prop = Util.loadProperties(
-                    System.getProperty("activehome.home") + "/properties/config.properties");
+                    System.getProperty("active-home.home") + "/properties/config.properties");
             char ksPass[] = prop.getProperty("ssh_ks").toCharArray();
             char ctPass[] = prop.getProperty("ssh_ct").toCharArray();
 
