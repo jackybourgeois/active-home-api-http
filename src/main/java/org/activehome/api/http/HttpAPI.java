@@ -94,7 +94,7 @@ public class HttpAPI extends API {
         pathHandler = new PathHandler();
 
         pathHandler.addPrefixPath("/bower_components", resource(new FileResourceManager(
-                new File(System.getProperty("activehome.home") + "/bower_components"), 100)));
+                new File(System.getProperty("active-home.home") + "/bower_components"), 100)));
         pathHandler.addPrefixPath("/notif", exchange -> exchange.dispatch(() -> {
             String body = HttpHelper.readBody(exchange);
 
