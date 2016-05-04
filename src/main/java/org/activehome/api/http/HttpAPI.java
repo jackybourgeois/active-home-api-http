@@ -323,7 +323,7 @@ public class HttpAPI extends API {
                 .replaceAll("\\$\\{description\\}", wrap.get("description").asString())
                 .replaceAll("\\$\\{title\\}", wrap.get("title").asString())
                 .replaceAll("\\$\\{url\\}", wrap.get("url").asString())
-                .replaceAll("\\$\\{wsUrl\\}", "wss://" + address + ":" + 8092 + "/data");
+                .replaceAll("\\$\\{wsUrl\\}", "ws://" + address + ":" + 8092 + "/data");
     }
 
     Request buildRequest(String dest, HttpServerExchange exchange) {
