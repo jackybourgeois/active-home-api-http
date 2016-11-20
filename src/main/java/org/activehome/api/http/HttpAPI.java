@@ -120,7 +120,7 @@ public class HttpAPI extends API {
         }
     }
 
-    public void startServerHttps() {
+    private void startServerHttps() {
         Log.info("Starting https server on: " + address + ":" + port);
         SessionAttachmentHandler sah = configureSession();
         server = Undertow.builder().addHttpsListener(port, address, createSSLContext())
@@ -129,7 +129,7 @@ public class HttpAPI extends API {
 
     }
 
-    public SSLContext createSSLContext() {
+    private SSLContext createSSLContext() {
         try {
             String ksName = System.getProperty("active-home.home") + "/keystore.jks";
             Properties prop = Util.loadProperties(
@@ -152,7 +152,7 @@ public class HttpAPI extends API {
         return null;
     }
 
-    public void startServerHttp() {
+    private void startServerHttp() {
         SessionAttachmentHandler sah = configureSession();
         Log.info("Starting http server on: " + address + ":" + port);
         server = Undertow.builder().addHttpListener(port, address)
@@ -179,8 +179,7 @@ public class HttpAPI extends API {
         }
     }
 
-    public void sendResponseOutside(UUID id, JsonObject jsonMsg) {
-        logInfo("send outside from: " + jsonMsg.get("src"));
+    private void sendResponseOutside(UUID id, JsonObject jsonMsg) {
         HttpServerExchange exchange = removeReqWaitingForSysResp(id);
         if (exchange != null) {
             Response response = new Response(jsonMsg);
@@ -198,10 +197,12 @@ public class HttpAPI extends API {
                 } else if (result.get("wrap") != null) {                       // info for a component to load
                     exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
                     exchange.getResponseSender().send(page(result.get("wrap").asObject()));
-                } else {                                                       // otherwise, simply forward the result
+                } else {                                                      // otherwise, simply forward the result
                     exchange.getResponseSender().send(response.getResult().toString());
                 }
-            } else {                                                           // otherwise, simply forward the result
+            } else if (response.getResult() instanceof Error) {
+                sendError(exchange, (Error) response.getResult());
+            } else {                                                          // otherwise, simply forward the result
                 exchange.getResponseSender().send(JsonHelper.objectToJson(response.getResult()).toString());
             }
             exchange.endExchange();
@@ -225,9 +226,8 @@ public class HttpAPI extends API {
                         public void success(Object result) {
                             auth((UUID) result, exchange);
                         }
-
                         public void error(Error result) {
-                            permissionDenied(exchange);
+                            sendError(exchange, result);
                         }
                     });
                 } else if (exchange.getRequestPath().startsWith("/auth/logout")) {
@@ -255,6 +255,7 @@ public class HttpAPI extends API {
                             }
 
                             public void error(Error result) {
+                                sendError(exchange, result);
                             }
                         });
                     } else if (exchange.getRequestPath().compareTo(path) == 0) {
@@ -262,7 +263,7 @@ public class HttpAPI extends API {
                         redirect(exchange, "/auth/red" + exchange.getRequestPath());
                     } else {
                         // otherwise, refuse access
-                        permissionDenied(exchange);
+                        sendError(exchange, new Error(ErrorType.PERMISSION_DENIED, "Access denied."));
                     }
                 }
             }));
@@ -279,7 +280,7 @@ public class HttpAPI extends API {
 
     }
 
-    public boolean forwardToUser(String path, Request req, HttpServerExchange exchange, UserInfo userInfo) {
+    private boolean forwardToUser(String path, Request req, HttpServerExchange exchange, UserInfo userInfo) {
         String src = userInfo.getHousehold() + "." + userInfo.getId() + "@" + exchange.getSourceAddress();
         String currentDest = userInfo.getHousehold() + req.getDest().substring(req.getDest().lastIndexOf("."));
         if (loggedInHandlerMap.containsKey(path)) {
@@ -299,25 +300,28 @@ public class HttpAPI extends API {
         return false;
     }
 
-    public void redirect(HttpServerExchange exchange, String location) {
+    private void redirect(HttpServerExchange exchange, String location) {
         exchange.setResponseCode(StatusCodes.TEMPORARY_REDIRECT);
         exchange.getResponseHeaders().put(Headers.LOCATION, location);
         exchange.getResponseSender().close();
     }
 
-    public void sendError(HttpServerExchange exchange, Error error) {
+    private void sendError(HttpServerExchange exchange, Error error) {
+        logInfo("send error " + error);
+        switch (error.getErrorType()) {
+            case NOT_FOUND: exchange.setResponseCode(StatusCodes.NOT_FOUND);
+                break;
+            case PERMISSION_DENIED: exchange.setResponseCode(StatusCodes.FORBIDDEN);
+                break;
+            default:
+                exchange.setResponseCode(StatusCodes.INTERNAL_SERVER_ERROR);
+        }
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/javascript");
         exchange.getResponseSender().send(error.toString());
         exchange.endExchange();
     }
 
-    public void permissionDenied(HttpServerExchange exchange) {
-        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/javascript");
-        exchange.getResponseSender().send(new Error(ErrorType.PERMISSION_DENIED, "Permission denied.").toString());
-        exchange.endExchange();
-    }
-
-    String page(JsonObject wrap) {
+    private String page(JsonObject wrap) {
         String page = FileHelper.fileToString("page.html", getClass().getClassLoader());
         return page.replaceAll("\\$\\{name\\}", wrap.get("name").asString())
                 .replaceAll("\\$\\{description\\}", wrap.get("description").asString())
@@ -326,7 +330,7 @@ public class HttpAPI extends API {
                 .replaceAll("\\$\\{wsUrl\\}", "ws://" + address + ":" + 8092 + "/data");
     }
 
-    Request buildRequest(String dest, HttpServerExchange exchange) {
+    private Request buildRequest(String dest, HttpServerExchange exchange) {
         String src = exchange.getSourceAddress().getAddress() + ":" + exchange.getSourceAddress().getPort();
         String relPath = exchange.getRelativePath();
 
@@ -382,15 +386,15 @@ public class HttpAPI extends API {
         pathHandler.removeExactPath(path);
     }
 
-    HttpServerExchange removeReqWaitingForSysResp(UUID id) {
+    private HttpServerExchange removeReqWaitingForSysResp(UUID id) {
         return reqWaitingForSysRespMap.remove(id);
     }
 
-    void addReqWaitingForSysResp(UUID uuid, HttpServerExchange exchange) {
+    private void addReqWaitingForSysResp(UUID uuid, HttpServerExchange exchange) {
         reqWaitingForSysRespMap.put(uuid, exchange);
     }
 
-    public void auth(UUID token, HttpServerExchange exchange) {
+    private void auth(UUID token, HttpServerExchange exchange) {
         Session session = getSession(exchange);
         session.setAttribute("token", token);
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/javascript");
@@ -413,7 +417,7 @@ public class HttpAPI extends API {
      *
      * @return
      */
-    SessionAttachmentHandler configureSession() {
+    private SessionAttachmentHandler configureSession() {
         SessionManager sessionManager = new InMemorySessionManager("SESSION_MANAGER");
         SessionCookieConfig sessionConfig = new SessionCookieConfig();
         SessionAttachmentHandler sessionAttachmentHandler =
@@ -431,7 +435,7 @@ public class HttpAPI extends API {
         return session;
     }
 
-    void clearSession(HttpServerExchange exchange) {
+    private void clearSession(HttpServerExchange exchange) {
         SessionManager sm = exchange.getAttachment(SessionManager.ATTACHMENT_KEY);
         SessionConfig sessionConfig = exchange.getAttachment(SessionConfig.ATTACHMENT_KEY);
         Session session = sm.getSession(exchange, sessionConfig);

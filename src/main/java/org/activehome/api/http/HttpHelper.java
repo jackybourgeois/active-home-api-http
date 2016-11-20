@@ -67,7 +67,8 @@ public class HttpHelper {
         return sb.toString();
     }
 
-    public static HashMap<String, Object> sendGet(String url, List<String> cookieList) {
+    public static HashMap<String, Object> sendGet(String url,
+                                                  List<String> cookieList) {
         try {
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -103,7 +104,9 @@ public class HttpHelper {
         return null;
     }
 
-    public static HashMap<String, Object> sendPost(String urlStr, String data, List<String> cookieList) {
+    public static HashMap<String, Object> sendPost(String urlStr,
+                                                   String data,
+                                                   List<String> cookieList) {
         try {
             URL url = new URL(urlStr);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
@@ -150,7 +153,10 @@ public class HttpHelper {
         return null;
     }
 
-    public static HashMap<String, Object> sendPostChallenge(String urlStr, String data, List<String> cookieList, String id) {
+    public static HashMap<String, Object> sendPostChallenge(String urlStr,
+                                                            String data,
+                                                            List<String> cookieList,
+                                                            String id) {
         try {
             URL url = new URL(urlStr);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
